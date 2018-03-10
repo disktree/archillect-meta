@@ -1,3 +1,4 @@
+package archillect;
 
 import haxe.io.Bytes;
 import haxe.Json;

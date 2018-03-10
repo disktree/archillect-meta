@@ -1,3 +1,4 @@
+package archillect;
 
 import haxe.Json;
 #if sys
