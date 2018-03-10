@@ -1,0 +1,7 @@
+-neko bin/archillect.n
+-main Main
+-cp src
+-lib hxargs
+-lib om.core
+#-lib om.term
+-debug
