@@ -67,6 +67,11 @@ class Main {
             if( meta.size == null ) {
                 meta.size = FileSystem.stat( imagePath ).size;
             }
+            if( meta.width == null || meta.height == null ) {
+                var size = Archillect.getImageSize( imagePath );
+                meta.width = size.width;
+                meta.height = size.height;
+            }
             if( meta.brightness == null ) {
                 try {
                     meta.brightness = Archillect.getImageBrightness( imagePath );
@@ -113,7 +118,6 @@ class Main {
         var end = 1000; //164269;
         var numThreads = 1;
         var classify = true;
-
 
         /*
         for( f in readDirectory('/mnt/HD1/images/archillect/archillect_0-50000.anal') ) {

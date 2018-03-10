@@ -21,6 +21,8 @@ typedef ImageMetaData = {
 	var url : String;
 	@:optional var type : String;
 	@:optional var size : Int;
+	@:optional var width : Int;
+	@:optional var height : Int;
 	@:optional var brightness : Int;
 	@:optional var classification : Array<Dynamic>;
 }
@@ -81,8 +83,27 @@ class Archillect {
 
 	/**
 	*/
+	public static function getImageSize( path : String ) : { width : Int, height : Int } {
+		var identify = new Process( 'identify', ['-ping','-format', '"%w %h"', path] );
+		switch identify.exitCode() {
+		case 0:
+			var str = identify.stdout.readAll().toString().trim().substr(1);
+			str = str.substr( 0, str.length-1 );
+			var a = str.split( ' ' );
+			return { width: Std.parseInt( a[0] ), height: Std.parseInt( a[1] ) };
+		case 1:
+			var error = identify.stderr.readAll().toString();
+			trace(error);
+			return throw error;
+		}
+		return null;
+	}
+
+	/**
+	*/
 	public static function getImageBrightness( path : String ) : Int {
 		var brightness : Int;
+		//TODO identify ping ?
 		var identify = new Process( 'convert', [path,'-resize','1x1!','-format','"%[fx:int(255*r+.5)],%[fx:int(255*g+.5)],%[fx:int(255*b+.5)]"','info:'] );
 		var result = identify.stdout.readAll();
 		var error = identify.stderr.readAll().toString();
