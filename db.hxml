@@ -1,0 +1,8 @@
+-neko bin/db.n
+-main archillect.DB
+-cp src
+-lib hxargs
+-lib om.core
+#-lib record-macros
+-dce full
+-debug

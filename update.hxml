@@ -1,0 +1,8 @@
+-neko bin/update.n
+-main archillect.Update
+-cp src
+-lib hxargs
+-lib om.core
+#-lib om.term
+-dce full
+-debug

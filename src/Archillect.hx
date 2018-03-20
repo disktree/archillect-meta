@@ -1,4 +1,3 @@
-package archillect;
 
 import haxe.Json;
 #if sys
@@ -16,21 +15,7 @@ import neko.vm.Thread;
 
 using StringTools;
 
-typedef ImageMetaData = {
-	var index : Int;
-	var url : String;
-	@:optional var type : String;
-	@:optional var size : Int;
-	@:optional var width : Int;
-	@:optional var height : Int;
-	@:optional var brightness : Int;
-	@:optional var classification : Array<Dynamic>;
-	@:optional var face : Dynamic; //FaceData;
-}
-
 class Archillect {
-
-
 
 	//TODO
 	macro public static function getMetaData( start : Int = 0, end : Int = 100000 ) : ExprOf<Array<Dynamic>> {

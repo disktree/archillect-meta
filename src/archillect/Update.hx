@@ -1,25 +1,18 @@
 package archillect;
 
-import haxe.io.Bytes;
-import haxe.Json;
 import haxe.Http;
-import haxe.io.Bytes;
 import neko.vm.Thread;
-import Sys.print;
-import Sys.println;
-import sys.FileSystem;
-import sys.io.File;
 
 using haxe.io.Path;
 
-class Main {
+class Update {
 
     static function run( i : Int, classify = false ) {
 
         println( i );
         var metaFile = 'meta/$i.json';
 
-        var meta : Archillect.ImageMetaData = if( FileSystem.exists( metaFile ) ) {
+        var meta : ImageMetaData = if( FileSystem.exists( metaFile ) ) {
             Json.parse( File.getContent( metaFile ) );
         } else {
             {
@@ -229,7 +222,7 @@ class Main {
                 }
             }
         } else {
-            for( i in start...end ) {
+            for( i in start...(end+1) ) {
                 run( i, classify );
             }
         }
