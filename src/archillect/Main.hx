@@ -94,6 +94,9 @@ class Main {
                     FileSystem.deleteFile( tmpJpg );
                 }
             }
+            if( meta.face == null ) {
+
+            }
         }
 
         var json = Json.stringify( meta, '  ' );
@@ -229,7 +232,6 @@ class Main {
             for( i in start...end ) {
                 run( i, classify );
             }
-
         }
 
     }

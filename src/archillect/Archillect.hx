@@ -25,20 +25,26 @@ typedef ImageMetaData = {
 	@:optional var height : Int;
 	@:optional var brightness : Int;
 	@:optional var classification : Array<Dynamic>;
+	@:optional var face : Dynamic; //FaceData;
 }
 
 class Archillect {
 
+
+
 	//TODO
-	/*
-	macro public static function getMetaData() : ExprOf<Array<Dynamic>> {
+	macro public static function getMetaData( start : Int = 0, end : Int = 100000 ) : ExprOf<Array<Dynamic>> {
 		var data = new Array<Dynamic>();
+		for( i in start...end ) {
+			data.push( File.getContent( '../meta/$i.json') );
+		}
+		/*
 		for( f in FileSystem.readDirectory( '../meta' ) ) {
 			data.push( File.getContent( '../meta/$f') );
 		}
+		*/
 		return macro $v{data};
 	}
-	*/
 
 	#if sys
 
@@ -102,11 +108,13 @@ class Archillect {
 	/**
 	*/
 	public static function getImageBrightness( path : String ) : Int {
-		var brightness : Int;
-		//TODO identify ping ?
-		var identify = new Process( 'convert', [path,'-resize','1x1!','-format','"%[fx:int(255*r+.5)],%[fx:int(255*g+.5)],%[fx:int(255*b+.5)]"','info:'] );
+		var identify = new Process( 'convert', [path,'-resize','1x1!','-format','"%[fx:int(255*r+.5)],%[fx:int(255*g+.5)],%[fx:int(255*b+.5)]"','info:-'] );
 		var result = identify.stdout.readAll();
 		var error = identify.stderr.readAll().toString();
+		//trace(result);
+		//trace(error);
+		var brightness : Int;
+		//TODO identify ping ?
 		if( error != "" ) {
 			trace(error.toString());
 			return null;
@@ -129,32 +137,39 @@ class Archillect {
 			'--model_dir', TENSORFLOW_MODEL,
 			'--image_file', path ];
 		var proc = new Process( 'python', args );
-		var data =switch proc.exitCode() {
-		case 0:
-			//TODO write json
-			var result = proc.stdout.readAll().toString();
-			var values = new Array<{name:String,precision:Float}>();
-			var lines = result.split('\n');
-			lines.pop();
-			for( line in lines ) {
-				var i = line.indexOf('(');
-				var strWords = line.substr( 0, i-1 );
-				var strPrecision = line.substring( i+9, line.length-1 );
-				var words = strWords.split(', ');
-				var precision = Std.parseFloat( strPrecision );
-				//trace( words, precision );
-				for( word in words ) {
-					values.push( { name: word, precision: precision } );
+		try {
+			var code = proc.exitCode();
+			var data = switch code {
+			case 0:
+				//TODO write json
+				var result = proc.stdout.readAll().toString();
+				var values = new Array<{name:String,precision:Float}>();
+				trace(values);
+				var lines = result.split('\n');
+				lines.pop();
+				for( line in lines ) {
+					var i = line.indexOf('(');
+					var strWords = line.substr( 0, i-1 );
+					var strPrecision = line.substring( i+9, line.length-1 );
+					var words = strWords.split(', ');
+					var precision = Std.parseFloat( strPrecision );
+					//trace( words, precision );
+					for( word in words ) {
+						values.push( { name: word, precision: precision } );
+					}
 				}
+				values;
+			default:
+				var error = proc.stderr.readAll();
+				Sys.println('EEEEEEEEEEEEEEERROR'+error);
+				null;
 			}
-			values;
-		default:
-			var error = proc.stderr.readAll();
-			Sys.println('EEEEEEEEEEEEEEERROR'+error);
-			null;
+			proc.close();
+			return data;
+		} catch(e:Dynamic) {
+			trace(e);
 		}
-		proc.close();
-		return data;
+		return null;
 	}
 
 	#end
