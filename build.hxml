@@ -1,7 +1,3 @@
--neko bin/archillect.n
--main archillect.Main
--cp src
--lib hxargs
--lib om.core
-#-lib om.term
--debug
+update.hxml
+--next
+json2db.hxml

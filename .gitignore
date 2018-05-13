@@ -1,3 +1,5 @@
+_*
+*.js.map
 img/
 meta/
 web/*.js*

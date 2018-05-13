@@ -1,7 +1,7 @@
 package archillect;
 
 import haxe.Http;
-import neko.vm.Thread;
+import om.Thread;
 
 using haxe.io.Path;
 

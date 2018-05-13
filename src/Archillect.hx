@@ -1,20 +1,13 @@
 
-import haxe.Json;
 #if sys
 import haxe.Http;
-import haxe.io.Bytes;
-import sys.FileSystem;
-import sys.io.File;
-import sys.io.Process;
-import Sys.print;
-import Sys.println;
 #end
 #if neko
 import neko.vm.Thread;
 #end
 
-using StringTools;
-
+/**
+**/
 class Archillect {
 
 	//TODO
@@ -115,6 +108,7 @@ class Archillect {
 	}
 
 	/**
+		Run image recognition
 	*/
 	public static function classifyImage( path : String ) {
 		var args = [
@@ -146,7 +140,7 @@ class Archillect {
 				values;
 			default:
 				var error = proc.stderr.readAll();
-				Sys.println('EEEEEEEEEEEEEEERROR'+error);
+				Sys.println('ERROR'+error);
 				null;
 			}
 			proc.close();
