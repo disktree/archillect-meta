@@ -7,6 +7,8 @@ using haxe.io.Path;
 
 class Update {
 
+    static inline var IMG_DIR = '/mnt/HD2/archillect';
+
     static function run( i : Int, classify = false ) {
 
         println( i );
@@ -15,7 +17,7 @@ class Update {
         var meta : ImageMetaData = if( FileSystem.exists( metaFile ) ) {
             Json.parse( File.getContent( metaFile ) );
         } else {
-            {
+            cast {
                 index: i,
                 url: Archillect.resolveImageUrl( i ),
                 brightness: null,
@@ -26,12 +28,15 @@ class Update {
 
         var imageName = meta.url.substr( meta.url.lastIndexOf('/')+1 );
         var imageExt = imageName.extension().toLowerCase();
-        var imagePath = 'img/$i.$imageExt';
+        //var imagePath = 'img/$i.$imageExt';
+        var imagePath = '$IMG_DIR/$i.$imageExt';
 
         //tmp cleanup from mess before
+        /*
         if( imageExt != 'jpg'  ) {
             if( FileSystem.exists( 'img/$i.jpg' ) ) FileSystem.deleteFile(  'img/$i.jpg' );
         }
+        */
 
         var exists = FileSystem.exists( imagePath );
         if( !exists ) {
@@ -52,6 +57,7 @@ class Update {
         if( meta.url == null ) {
             meta.url = Archillect.resolveImageUrl( i );
         }
+
         if( meta.type == null ) {
             meta.type = imageExt;
         }
@@ -87,9 +93,12 @@ class Update {
                     FileSystem.deleteFile( tmpJpg );
                 }
             }
+
+            /*
             if( meta.face == null ) {
 
             }
+            */
         }
 
         var json = Json.stringify( meta, '  ' );

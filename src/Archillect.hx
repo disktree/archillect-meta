@@ -112,7 +112,7 @@ class Archillect {
 	*/
 	public static function classifyImage( path : String ) {
 		var args = [
-			'script/classify_image.py',
+			'bin/classify_image.py',
 			'--model_dir', TENSORFLOW_MODEL,
 			'--image_file', path ];
 		var proc = new Process( 'python', args );
