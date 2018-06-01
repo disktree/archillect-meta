@@ -1,5 +1,5 @@
--neko bin/update.n
--main archillect.Update
+-neko bin/archillect.n
+-main archillect.Main
 -cp src
 -lib hxargs
 -lib om.core

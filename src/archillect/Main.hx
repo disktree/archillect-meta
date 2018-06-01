@@ -5,7 +5,7 @@ import om.Thread;
 
 using haxe.io.Path;
 
-class Update {
+class Main {
 
     static inline var IMG_DIR = '/mnt/HD2/archillect';
 
@@ -120,7 +120,7 @@ class Update {
         var cmd : String;
         //var path : String;
         var start = 1;
-        var end = 1000; //164269;
+        var end = 1000;
         var numThreads = 1;
         var classify = true;
 
@@ -170,6 +170,11 @@ class Update {
             ["-classify"] => function(v:Bool) {
                 classify = v;
             },
+            /*
+            @doc("Export json file")
+            ["-json"] => function(file:String) {
+            },
+            */
             _ => (arg:String) -> {
                 println( 'Unknown command: $arg' );
                 println( 'Usage : neko archillect.n <cmd> [params]' );
