@@ -1,10 +1,9 @@
 _*
-*.js.map
 img/
 meta/
-web/*.js*
 *.json
 *.n
+*.hl
 *.tar
 *.xz
 NOTES
