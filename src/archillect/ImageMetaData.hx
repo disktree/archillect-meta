@@ -33,14 +33,14 @@ typedef ImageMetaData = {
 	var height : Null<Int>;
 
 	/****/
-	var colorSpace : String;
+	//var colorSpace : String;
 
 	/** Dominant color **/
 	var color : Color;
 
 	/** Brightness **/
 	//var brightness : Int;
-	var brightness : Float;
+	var brightness : Null<Float>;
 
 	/***/
 	var classification : Array<Classification>;

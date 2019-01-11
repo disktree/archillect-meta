@@ -1,4 +1,6 @@
 _*
+bin/cpp/
+bin/archillect-meta
 img/
 meta/
 *.json

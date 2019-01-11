@@ -19,12 +19,15 @@ class Main {
         var meta : ImageMetaData = if( FileSystem.exists( metaFile ) ) {
             Json.parse( File.getContent( metaFile ) );
         } else {
-            cast {
+            {
                 index: index,
                 url: Archillect.resolveImageUrl( index ),
+				type: null,
+				size: null,
+				width: null,
+				height: null,
                 color: null,
                 brightness: null,
-                size: null,
                 classification: null
             };
         }
@@ -40,6 +43,7 @@ class Main {
         }
 
 		var exists = FileSystem.exists( imagePath );
+
 		if( !exists ) {
 			println('Downloading …');
 			var _url = Archillect.downloadImage( meta.url, imagePath );
@@ -47,6 +51,7 @@ class Main {
 				println( 'Image not found: '+meta.url );
 				exists = false;
 			} else if( _url != meta.url ) {
+				println( 'Image changed url: '+meta.url );
 				meta.url = _url;
 				imageName = meta.url.substr( meta.url.lastIndexOf('/')+1 );
 				imagePath = 'img/$index.$imageExt';
@@ -65,63 +70,20 @@ class Main {
                 meta.width = size.width;
                 meta.height = size.height;
             }
-			if( meta.color == null ) {
+			if( meta.brightness == null || meta.brightness == 0 ) {
 				var colorStr = ImageTools.getDominantColor( imagePath );
-				var i = colorStr.indexOf('""');
-				if( i != -1 ) {
-					colorStr = colorStr.substr( 0, i+1 );
+				var rgba = ImageTools.dominantColorToRGBA( colorStr );
+				if( rgba == null ) {
+					println( 'WARNING: failed to get image color [$colorStr]' );
+				} else {
+					meta.color = rgba;
+					var rgb = om.color.space.RGB.create( meta.color.r, meta.color.g, meta.color.b );
+					meta.brightness = rgb.toGrey();
 				}
-				colorStr = colorStr.substr(1,colorStr.length-2);
-				var color : { r : Int, g : Int, b : Int, a : Float } = null;
-				switch colorStr {
-				case 'black':
-					color = { r : 0, g : 0, b : 0, a : 1.0 };
-				default:
-					var colorInfo = ColorParser.parseColor( colorStr );
-					if( colorInfo == null ) {
-						println( 'WARNING: failed to parse color info [$colorStr]' );
-						color = { r : 0, g : 0, b : 0, a : 1.0 };
-					} else {
-						color = switch colorInfo.name {
-						case null:
-							println( 'WARNING: failed to parse color info [$colorStr]' );
-							{ r : 0, g : 0, b : 0, a : 1.0 };
-						case 'lineargray','lineargraya':
-							println( 'WARNING: failed to parse color info [$colorStr]' );
-							{ r : 0, g : 0, b : 0, a : 1.0 };
-						case 'white','black','cmyk':
-							{ r : 0, g : 0, b : 0, a : 1.0 };
-						case 'rgb','srgb':
-							var a = ColorParser.getInt8Channels( colorInfo.channels, 3 );
-							{ r : a[0], g : a[1], b : a[2], a : 1.0 };
-						case 'rgba','srgba':
-							{
-								r : EnumValueTools.getParameters( colorInfo.channels[0] )[0],
-								g : EnumValueTools.getParameters( colorInfo.channels[1] )[0],
-								b : EnumValueTools.getParameters( colorInfo.channels[2] )[0],
-								a : EnumValueTools.getParameters( colorInfo.channels[3] )[0]
-							};
-						case 'gray','graya':
-							var v = ColorParser.getInt8Channel( colorInfo.channels[0] );
-							{ r : v, g : v, b : v, a : 1.0 };
-						default:
-							throw 'unknown color space [$index][$colorStr]';
-						}
-					}
-				}
-				if( color == null ) {
-					throw 'failed to get image color [$colorStr]';
-				}
-				meta.color = color;
-            }
-
-			//TODO
-			//if( meta.brightness == null ) {
-			if(true) {
-				var rgb = om.color.space.RGB.create( meta.color.r, meta.color.g, meta.color.b );
-				meta.brightness = rgb.toGrey();
 			}
-
+			if( meta.color == null ) {
+				meta.color = ImageTools.dominantColorToRGBA( ImageTools.getDominantColor( imagePath ) );
+			}
 			if( classify && meta.classification == null ) {
 				switch imageExt {
                 case 'jpg','jpeg':
@@ -138,7 +100,12 @@ class Main {
                 }
 			}
 		} else {
-			println('image not downloaded [$index]');
+			println('Image not available [$index]');
+			meta.size = null;
+			meta.width = null;
+			meta.height = null;
+			meta.color = null;
+			meta.brightness = null;
 		}
 
 		var json = Json.stringify( meta, '  ' );

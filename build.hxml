@@ -1,5 +1,5 @@
-#-neko bin/archillect.n
--hl bin/archillect.hl
+-cpp bin/cpp
+-cmd cp bin/cpp/Main-debug bin/archillect-meta
 -main archillect.Main
 -cp src
 -lib hxargs
