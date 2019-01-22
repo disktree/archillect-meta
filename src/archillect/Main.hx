@@ -127,17 +127,6 @@ class Main {
         if( Sys.systemName() != 'Linux' )
 			error( 'Linux only' );
 
-		/*
-        for( i in 1...175000 ) {
-            var meta = Json.parse( File.getContent( 'meta/$i.json' ) );
-            if( meta.type == 'gif' ) {
-                trace(i);
-                Sys.command( 'ffmpeg -f gif -r 60 -i img/$i.gif video/$i.mp4' );
-            }
-        }
-        return;
-		*/
-
         var cmd : String;
 		var imagePath : String;
 		var metaPath = 'meta';
@@ -151,6 +140,15 @@ class Main {
 	        ["update"] => function() {
 				cmd = "update";
             },
+			@doc("Export meta data as single json file")
+			["export"] => function(file:String) {
+				var entries = new Array<ImageMetaData>();
+				for( f in FileSystem.readDirectory( metaPath ) )
+ 				   	entries.push( Json.readFile( '$metaPath/$f' ) );
+ 			   	entries.sort( (a,b) -> return (a.index > b.index) ? 1 : (a.index < b.index) ? -1 : 0 );
+ 			   	File.saveContent( file, Json.stringify( entries ) );
+ 			   	Sys.exit(0);
+			},
 			@doc("Path to image directory")
 	        ["-image_path"] => function(path:String) {
 				imagePath = path;
@@ -181,11 +179,6 @@ class Main {
 			["--help"] => function() {
 				exit( argsHandler.getDoc() );
 			},
-            /*
-            @doc("Export json file")
-            ["-json"] => function(file:String) {
-            },
-            */
             _ => (arg:String) -> {
                 println( 'Unknown command: $arg' );
                 println( 'Usage : neko archillect.n <cmd> [params]' );

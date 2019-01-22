@@ -1,7 +1,7 @@
 _*
 bin/cpp/
 bin/archillect-meta
-img/
+img
 meta/
 *.json
 *.n

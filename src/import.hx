@@ -1,5 +1,5 @@
 
-import haxe.Json;
+import om.Json;
 import haxe.io.Bytes;
 
 using om.StringTools;
