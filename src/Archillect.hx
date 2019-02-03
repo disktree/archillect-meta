@@ -2,32 +2,30 @@
 import haxe.Http;
 
 /**
+	Hacks for gathering data.
 **/
 class Archillect {
 
 	public static inline var URI = "http://archillect.com";
 
-	//TODO
-	/*
-	macro public static function getMetaData( start : Int = 0, end : Int = 100000 ) : ExprOf<Array<Dynamic>> {
-		var data = new Array<Dynamic>();
-		for( i in start...end ) {
-			data.push( File.getContent( '../meta/$i.json') );
+	/**
+		Resolve the current index. HACK
+	**/
+	public static function resolveCurrentIndex() : Int {
+		var searchTerm = '<div class="overlay">';
+		var lines = Http.requestUrl( URI ).split('\n');
+		for( line in lines ) {
+			if( (line = line.trim()).startsWith( searchTerm ) ) {
+				var str = line.substr( searchTerm.length );
+				return Std.parseInt( str.substr( 0, str.length-'</div>'.length ).trim() );
+			}
 		}
-		/*
-		for( f in FileSystem.readDirectory( '../meta' ) ) {
-			data.push( File.getContent( '../meta/$f') );
-		}
-		* /
-		return macro $v{data};
+		return throw 'failed to resolve current index';
 	}
-	*/
-
-	//public static var TENSORFLOW_MODEL = '/home/tong/src/tensorflow/models/tutorials/image/imagenet/inception_v3_2016_08_28_frozen.pb';
 
 	/**
-		Retrieve archillect image url for given index.
-	*/
+		Retrieve image url for given index.
+	**/
 	public static function resolveImageUrl( index : Int ) : String {
 		var url = URI +'/'+ index;
 		var html = Http.requestUrl( url );
@@ -38,29 +36,28 @@ class Archillect {
 	}
 
 	/**
-		Download file and save it to given path.
-	*/
+		Download image and save it to given path.
+	**/
 	public static function downloadImage( url : String, dst : String ) : String {
 		var status : Int;
-		var request = new Http( url );
+		var req = new Http( url );
         var status : Int;
-		request.onError = function(e) {
+		req.onError = function(e) {
 			url = null;
 		}
-		request.onStatus = function (e:Int) status = e;
-        request.onData = function(e) {
-		//	trace( status );
+		req.onStatus = function (e:Int) status = e;
+        req.onData = function(e) {
             switch status {
             case 404:
 				url = null;
             case 301:
-                var location = url = request.responseHeaders.get( 'Location' );
+                var location = url = req.responseHeaders.get( 'Location' );
 				url = downloadImage( location, dst );
             case 200:
 				File.saveBytes( dst, Bytes.ofString( e ) );
             }
         }
-        request.request();
+        req.request();
 		return url;
 	}
 

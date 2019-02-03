@@ -1,5 +1,6 @@
 package archillect;
 
+import archillect.ImageMetaData;
 import haxe.Http;
 import haxe.EnumTools.EnumValueTools;
 import om.Thread;
@@ -72,6 +73,18 @@ class Main {
             }
 			if( meta.brightness == null || meta.brightness == 0 ) {
 				var colorStr = ImageTools.getDominantColor( imagePath );
+				/*
+				var colorStr :String = null; //= ImageTools.getDominantColor( imagePath );
+				try {
+					colorStr = ImageTools.getDominantColor( imagePath );
+				} catch(e:Dynamic) {
+					throw 'failed to determine color';
+					trace(e);
+					return;
+				}
+				if( colorStr == null )
+				*/
+				//var colorStr = ImageTools.getDominantColor( imagePath );
 				var rgba = ImageTools.dominantColorToRGBA( colorStr );
 				if( rgba == null ) {
 					println( 'WARNING: failed to get image color [$colorStr]' );
@@ -109,7 +122,6 @@ class Main {
 		}
 
 		var json = Json.stringify( meta, '  ' );
-        //println( json );
         File.saveContent( metaFile, json );
     }
 
@@ -128,10 +140,10 @@ class Main {
 			error( 'Linux only' );
 
         var cmd : String;
-		var imagePath : String;
+		var imagePath = 'img';
 		var metaPath = 'meta';
-        var start : Null<Int>; //= 1;
-        var end : Null<Int>; //= 1000;
+        var start : Null<Int>;
+        var end : Null<Int>;
         var numThreads = 1;
         var classify = false;
 
@@ -149,6 +161,12 @@ class Main {
  			   	File.saveContent( file, Json.stringify( entries ) );
  			   	Sys.exit(0);
 			},
+			/*
+			@doc("Export classification word index")
+			["wordlist"] => function() {
+				cmd = "wordindex";
+			},
+			*/
 			@doc("Path to image directory")
 	        ["-image_path"] => function(path:String) {
 				imagePath = path;
@@ -193,14 +211,13 @@ class Main {
 			println( 'No command specified' );
 			error( argsHandler.getDoc() );
 		}
-		if( start == null )
-            error( 'No start index specified' );
-		if( end == null )
-            error( 'No end index specified' );
+
+		if( start == null ) start = FileSystem.readDirectory( metaPath ).length;
+		if( end == null ) end = Archillect.resolveCurrentIndex();
 		if( start <= 0 || end <= 0 || start > end )
             error( 'Invalid index range' );
-		if( imagePath == null )
-            error( 'No image directory specified' );
+		//if( imagePath == null )
+        //    error( 'No image directory specified' );
 		if( classify ) {
             if( numThreads > 1 ) {
                 println( 'Cannot run classification in multiple threads' );
@@ -248,6 +265,58 @@ class Main {
 					update( i, imagePath, metaPath, classify );
 				}
 			}
+			/*
+		case "wordindex":
+			//TODO
+			/*
+			var wordlist = new Array<String>();
+			function readMeta( i : Int ) {
+				println(i+' '+ wordlist.length);
+				//var classifications : Array<Classification> = Json.readFile( '$metaPath/$i.json' ).classification;
+				var classifications : Array<Classification> = try Json.readFile( '$metaPath/$i.json' ).classification catch(e:Dynamic) {
+					trace(e);
+					return;
+				}
+				for( cl in classifications ) {
+					if( wordlist.indexOf( cl.name ) == -1 ) {
+						wordlist.push( cl.name );
+					}
+				}
+				if( i == end ) {
+					trace('DONE',wordlist.length);
+					Sys.exit(0);
+				} else {
+					readMeta( ++i );
+				}
+			}
+			readMeta( start );
+			*/
+			/*
+			var map = new Map<String,Array<Int>>();
+			function readMeta( i : Int ) {
+				println(i);
+				var meta : ImageMetaData = Json.readFile( '$metaPath/$i.json' );
+				for( cl in meta.classification ) {
+					if( map.exists( cl.name ) ) {
+						map.get( cl.name ).push( i );
+					} else {
+						map.set( cl.name, [i] );
+					}
+				}
+				if( ++i >= end ) {
+					trace('DONE');
+					var obj : Dynamic = {};
+					for( k=>v in map ) {
+						Reflect.setField( obj, k, v );
+					}
+					//File.saveContent( 'wordlist.json', Json.stringify( obj ) );
+					File.saveContent( 'wordlist.json', haxe.format.JsonPrinter.print( obj, '\t' ) );
+				} else {
+					readMeta( i );
+				}
+			}
+			readMeta( start );
+			*/
 		}
     }
 

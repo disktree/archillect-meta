@@ -5,9 +5,8 @@ import om.color.ColorParser;
 
 class ImageTools {
 
-	//public static var TENSORFLOW_MODEL = '/home/tong/src/tensorflow/models/tutorials/image/imagenet/inception_v3_2016_08_28_frozen.pb';
 	public static var TENSORFLOW_MODEL_DIR = '/home/tong/src/tensorflow-models/inception-2015-12-05/';
-	public static var TENSORFLOW_MODEL = '/home/tong/src/tensorflow-models/inception-2015-12-05/classify_image_graph_def.pb';
+	//public static var TENSORFLOW_MODEL = '/home/tong/src/tensorflow-models/inception-2015-12-05/classify_image_graph_def.pb';
 
 	/**
 	*/
@@ -96,7 +95,6 @@ class ImageTools {
 	public static function classifyImage( path : String ) : Array<{name:String,precision:Float}> {
 		var args = [
 			'bin/classify_image.py',
-			//'--model_dir', TENSORFLOW_MODEL,
 			'--model_dir', TENSORFLOW_MODEL_DIR,
 			'--image_file', path ];
 		var proc = new Process( 'python', args );
