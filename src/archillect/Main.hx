@@ -14,13 +14,17 @@ class Main {
 
     static function update( index : Int, imagePath : String, metaPath : String, classify = false ) {
 
-		println( index );
+		print( index+' ' );
+
+		function printAction( t : String ) print( '/$t' );
 
 		var metaFile = '$metaPath/$index.json';
-        var meta : ImageMetaData = if( FileSystem.exists( metaFile ) ) {
-            Json.parse( File.getContent( metaFile ) );
-        } else {
-            {
+		var meta : ImageMetaData;
+		if( FileSystem.exists( metaFile ) ) {
+			meta = Json.parse( File.getContent( metaFile ) );
+		} else {
+			printAction( 'N' );
+			meta = {
                 index: index,
                 url: Archillect.resolveImageUrl( index ),
 				type: null,
@@ -31,7 +35,7 @@ class Main {
                 brightness: null,
                 classification: null
             };
-        }
+		}
 
 		var imageName = meta.url.substr( meta.url.lastIndexOf('/')+1 );
         var imageExt = imageName.extension().toLowerCase();
@@ -40,13 +44,14 @@ class Main {
 		meta.type = imageExt;
 
 		if( meta.url == null ) {
+			printAction( 'URL' );
             meta.url = Archillect.resolveImageUrl( index );
         }
 
 		var exists = FileSystem.exists( imagePath );
 
 		if( !exists ) {
-			println('Downloading …');
+			printAction( 'DL' );
 			var _url = Archillect.downloadImage( meta.url, imagePath );
 			if( _url == null ) {
 				println( 'Image not found: '+meta.url );
@@ -67,11 +72,13 @@ class Main {
                 meta.size = FileSystem.stat( imagePath ).size;
             }
 			if( meta.width == null || meta.height == null ) {
+				printAction( 'SZE' );
                 var size = ImageTools.getImageSize( imagePath );
                 meta.width = size.width;
                 meta.height = size.height;
             }
 			if( meta.brightness == null || meta.brightness == 0 ) {
+				printAction( 'COL' );
 				var colorStr = ImageTools.getDominantColor( imagePath );
 				/*
 				var colorStr :String = null; //= ImageTools.getDominantColor( imagePath );
@@ -98,6 +105,7 @@ class Main {
 				meta.color = ImageTools.dominantColorToRGBA( ImageTools.getDominantColor( imagePath ) );
 			}
 			if( classify && meta.classification == null ) {
+				printAction( 'CLS' );
 				switch imageExt {
                 case 'jpg','jpeg':
                     meta.classification = ImageTools.classifyImage( imagePath );
@@ -123,6 +131,8 @@ class Main {
 
 		var json = Json.stringify( meta, '  ' );
         File.saveContent( metaFile, json );
+
+		println( '' );
     }
 
 	static function exit( ?msg : String, code = 0 ) {
@@ -145,7 +155,7 @@ class Main {
         var start : Null<Int>;
         var end : Null<Int>;
         var numThreads = 1;
-        var classify = false;
+        var classify = true;
 
         argsHandler = hxargs.Args.generate([
             @doc("Update db")
@@ -207,11 +217,7 @@ class Main {
 
 		argsHandler.parse( Sys.args() );
 
-		if( cmd == null ) {
-			println( 'No command specified' );
-			error( argsHandler.getDoc() );
-		}
-
+		if( cmd == null ) cmd = 'update';
 		if( start == null ) start = FileSystem.readDirectory( metaPath ).length;
 		if( end == null ) end = Archillect.resolveCurrentIndex();
 		if( start <= 0 || end <= 0 || start > end )
@@ -232,8 +238,10 @@ class Main {
 
 		switch cmd {
 		case "update":
+			var numItems = (end-start);
+			println( 'Start $start→$end / $numItems' );
 			if( numThreads > 1 ) {
-				var numDownloads = end - start;
+				var numDownloads = numItems;
 	            if( numDownloads < numThreads ) numThreads = numDownloads;
 	            var numUrlsPerThread = Std.int( numDownloads / numThreads );
 	            var s = start;
@@ -265,6 +273,7 @@ class Main {
 					update( i, imagePath, metaPath, classify );
 				}
 			}
+			println( 'Done $numItems $start→$end' );
 			/*
 		case "wordindex":
 			//TODO
