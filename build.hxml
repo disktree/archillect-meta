@@ -1,9 +1,11 @@
--cpp bin/cpp
--cmd cp bin/cpp/Main-debug bin/archillect-meta
+#-cpp bin/cpp
+-neko bin/archillect-meta.n
 -main archillect.Main
 -cp src
+-lib archillect
 -lib hxargs
 -lib om.core
 -lib om.color
 -dce full
 -debug
+#-cmd cp bin/cpp/Main-debug bin/archillect-meta

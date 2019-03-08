@@ -26,7 +26,7 @@ class Main {
 			printAction( 'N' );
 			meta = {
                 index: index,
-                url: null,
+                url: null, //Archillect.resolveImageUrl( index ),
 				type: null,
 				size: null,
 				width: null,
@@ -41,9 +41,14 @@ class Main {
 			printAction( 'URL' );
             meta.url = Archillect.resolveImageUrl( index );
         }
+		if( meta.url == null ) {
+			println( 'URL not resoved' );
+			return;
+        }
 
-		var imageName = meta.url.substr( meta.url.lastIndexOf('/')+1 );
-        var imageExt = imageName.extension().toLowerCase();
+		//var imageName = meta.url.substr( meta.url.lastIndexOf('/')+1 );
+        //var imageExt = imageName.extension().toLowerCase();
+        var imageExt = meta.url.extension().toLowerCase();
         var imagePath = '$imagePath/$index.$imageExt';
 
 		meta.type = imageExt;
@@ -59,7 +64,7 @@ class Main {
 			} else if( _url != meta.url ) {
 				println( 'Image changed url: '+meta.url );
 				meta.url = _url;
-				imageName = meta.url.substr( meta.url.lastIndexOf('/')+1 );
+				//imageName = meta.url.substr( meta.url.lastIndexOf('/')+1 );
 				imagePath = 'img/$index.$imageExt';
 				exists = true;
 			} else {

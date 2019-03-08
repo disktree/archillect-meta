@@ -9,7 +9,7 @@ class Archillect {
 	public static inline var URI = "http://archillect.com";
 
 	/**
-		Resolve the current index. HACK
+		HACK: Resolve the current index.
 	**/
 	public static function resolveCurrentIndex() : Int {
 		var searchTerm = '<div class="overlay">';
@@ -29,9 +29,21 @@ class Archillect {
 	public static function resolveImageUrl( index : Int ) : String {
 		var url = URI +'/'+ index;
 		var html = Http.requestUrl( url );
+		for( line in  html.split( '\n' ) ) {
+			if( line.indexOf('name="twitter:image"') != -1 ) {
+				line = line.substr( 0, line.length-2 )+'/>';
+				//trace(line);
+				return Xml.parse( line ).firstElement().get( 'content' );
+			}
+
+		}
+		return null;
+		/*
 		var line = StringTools.trim( html.split( '\n' )[19] );
 		line = line.substr( 0, line.length-1 )+'/>';
+		trace(line);
 		return Xml.parse( line ).firstElement().get( 'content' );
+		*/
 	}
 
 	/**
