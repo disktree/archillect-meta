@@ -26,7 +26,7 @@ class Main {
 			printAction( 'N' );
 			meta = {
                 index: index,
-                url: Archillect.resolveImageUrl( index ),
+                url: null,
 				type: null,
 				size: null,
 				width: null,
@@ -37,16 +37,16 @@ class Main {
             };
 		}
 
+		if( meta.url == null ) {
+			printAction( 'URL' );
+            meta.url = Archillect.resolveImageUrl( index );
+        }
+
 		var imageName = meta.url.substr( meta.url.lastIndexOf('/')+1 );
         var imageExt = imageName.extension().toLowerCase();
         var imagePath = '$imagePath/$index.$imageExt';
 
 		meta.type = imageExt;
-
-		if( meta.url == null ) {
-			printAction( 'URL' );
-            meta.url = Archillect.resolveImageUrl( index );
-        }
 
 		var exists = FileSystem.exists( imagePath );
 

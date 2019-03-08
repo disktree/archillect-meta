@@ -29,10 +29,9 @@ class Archillect {
 	public static function resolveImageUrl( index : Int ) : String {
 		var url = URI +'/'+ index;
 		var html = Http.requestUrl( url );
-		//TODO parse source link
-		//TODO parse xml ?
-		var line = StringTools.trim( html.split( '\n' )[18] );
-		return line.substring( 17, line.length - 3 );
+		var line = StringTools.trim( html.split( '\n' )[19] );
+		line = line.substr( 0, line.length-1 )+'/>';
+		return Xml.parse( line ).firstElement().get( 'content' );
 	}
 
 	/**
