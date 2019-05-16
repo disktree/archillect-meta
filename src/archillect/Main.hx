@@ -12,7 +12,7 @@ class Main {
 
 	static var argsHandler : {getDoc:Void->String,parse:Array<Dynamic>->Void};
 
-    static function update( index : Int, imagePath : String, metaPath : String, classify = false ) {
+    static function update( index : Int, imagePath : String, metaPath : String, classify = false, ocr = false ) {
 
 		print( index+' ' );
 
@@ -33,7 +33,8 @@ class Main {
 				height: null,
                 color: null,
                 brightness: null,
-                classification: null
+                classification: null,
+				text: null
             };
 		}
 
@@ -125,6 +126,17 @@ class Main {
                     FileSystem.deleteFile( tmpJpg );
                 }
 			}
+			if( ocr && meta.text == null ) {
+				printAction( 'TXT' );
+				var text = try ImageTools.findText( imagePath ) catch(e:Dynamic) {
+					Sys.println(e);
+					null;
+				}
+				if( text != null ) {
+					//Sys.println( 'TEXT: '+text) ;
+					meta.text = text;
+				}
+			}
 		} else {
 			println('Image not available [$index]');
 			meta.size = null;
@@ -161,6 +173,7 @@ class Main {
         var end : Null<Int>;
         var numThreads = 1;
         var classify = true;
+        var ocr = true;
 
         argsHandler = hxargs.Args.generate([
             @doc("Update db")
@@ -205,8 +218,16 @@ class Main {
                 numThreads = i;
             },
             @doc("Run image classification")
-            ["-classify"] => function() {
+            ["--classify"] => function() {
                 classify = true;
+            },
+			@doc("Don't run image classification")
+            ["--no-classify"] => function() {
+                classify = false;
+            },
+			@doc("Don't run text recognition")
+            ["--no-ocr"] => function() {
+                ocr = false;
             },
 			@doc("Print usage")
 			["--help"] => function() {
@@ -256,7 +277,7 @@ class Main {
 	                    var start = Thread.readMessage(true);
 	                    var num = Thread.readMessage(true);
 	                    var end = start + num;
-	                    for( i in start...end ) update( i, imagePath, metaPath, classify );
+	                    for( i in start...end ) update( i, imagePath, metaPath, classify, ocr );
 	                    main.sendMessage('ok');
 	                });
 	                t.sendMessage( Thread.current() );
@@ -275,7 +296,7 @@ class Main {
 	            }
 			} else {
 				for( i in start...(end+1) ) {
-					update( i, imagePath, metaPath, classify );
+					update( i, imagePath, metaPath, classify, ocr );
 				}
 			}
 			println( 'Done $numItems $start→$end' );
