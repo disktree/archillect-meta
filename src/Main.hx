@@ -1,4 +1,3 @@
-package archillect;
 
 import archillect.ImageMetaData;
 import haxe.Http;
@@ -40,10 +39,10 @@ class Main {
 
 		if( meta.url == null ) {
 			printAction( 'URL' );
-            meta.url = Archillect.resolveImageUrl( index );
+            meta.url = Website.resolveImageUrl( index );
         }
 		if( meta.url == null ) {
-			println( 'URL not resoved' );
+			println( 'URL not resolved' );
 			return;
         }
 
@@ -55,10 +54,11 @@ class Main {
 		meta.type = imageExt;
 
 		var exists = FileSystem.exists( imagePath );
+		//trace(imagePath,exists);
 
 		if( !exists ) {
 			printAction( 'DL' );
-			var _url = Archillect.downloadImage( meta.url, imagePath );
+			var _url = Website.downloadImage( meta.url, imagePath );
 			if( _url == null ) {
 				println( 'Image not found: '+meta.url );
 				exists = false;
@@ -79,36 +79,51 @@ class Main {
             }
 			if( meta.width == null || meta.height == null ) {
 				printAction( 'SZE' );
-                var size = ImageTools.getImageSize( imagePath );
-                meta.width = size.width;
-                meta.height = size.height;
+				try {
+					var size = ImageTools.getImageSize( imagePath );
+					meta.width = size.width;
+					meta.height = size.height;
+				} catch(e:Dynamic) {
+					Sys.println(' ERROR: $e');
+				}
             }
 			if( meta.brightness == null || meta.brightness == 0 ) {
 				printAction( 'COL' );
-				var colorStr = ImageTools.getDominantColor( imagePath );
-				/*
-				var colorStr :String = null; //= ImageTools.getDominantColor( imagePath );
 				try {
-					colorStr = ImageTools.getDominantColor( imagePath );
+					var colorStr = ImageTools.getDominantColor( imagePath );
+					/*
+					var colorStr :String = null; //= ImageTools.getDominantColor( imagePath );
+					try {
+						colorStr = ImageTools.getDominantColor( imagePath );
+					} catch(e:Dynamic) {
+						throw 'failed to determine color';
+						trace(e);
+						return;
+					}
+					if( colorStr == null )
+					*/
+					//var colorStr = ImageTools.getDominantColor( imagePath );
+					var rgba = ImageTools.dominantColorToRGBA( colorStr );
+					if( rgba == null ) {
+						println( 'WARNING: failed to get image color [$colorStr]' );
+					} else {
+						meta.color = rgba;
+						var rgb = om.color.space.RGB.create( meta.color.r, meta.color.g, meta.color.b );
+						meta.brightness = rgb.toGrey();
+					}
 				} catch(e:Dynamic) {
-					throw 'failed to determine color';
-					trace(e);
-					return;
-				}
-				if( colorStr == null )
-				*/
-				//var colorStr = ImageTools.getDominantColor( imagePath );
-				var rgba = ImageTools.dominantColorToRGBA( colorStr );
-				if( rgba == null ) {
-					println( 'WARNING: failed to get image color [$colorStr]' );
-				} else {
-					meta.color = rgba;
-					var rgb = om.color.space.RGB.create( meta.color.r, meta.color.g, meta.color.b );
-					meta.brightness = rgb.toGrey();
+					Sys.println(' ERROR: $e');
 				}
 			}
 			if( meta.color == null ) {
-				meta.color = ImageTools.dominantColorToRGBA( ImageTools.getDominantColor( imagePath ) );
+				
+				try {
+					meta.color = ImageTools.dominantColorToRGBA( ImageTools.getDominantColor( imagePath ) );
+				} catch(e:Dynamic) {
+					Sys.println(' ERROR: $e');
+				}
+				
+				return;
 			}
 			if( classify && meta.classification == null ) {
 				printAction( 'CLS' );
@@ -126,6 +141,7 @@ class Main {
                     FileSystem.deleteFile( tmpJpg );
                 }
 			}
+			/*
 			if( ocr && meta.text == null ) {
 				printAction( 'TXT' );
 				var text = try ImageTools.findText( imagePath ) catch(e:Dynamic) {
@@ -137,6 +153,7 @@ class Main {
 					meta.text = text;
 				}
 			}
+			*/
 		} else {
 			println('Image not available [$index]');
 			meta.size = null;
@@ -173,7 +190,7 @@ class Main {
         var end : Null<Int>;
         var numThreads = 1;
         var classify = true;
-        var ocr = true;
+        var ocr = false;
 
         argsHandler = hxargs.Args.generate([
             @doc("Update db")
@@ -245,7 +262,7 @@ class Main {
 
 		if( cmd == null ) cmd = 'update';
 		if( start == null ) start = FileSystem.readDirectory( metaPath ).length;
-		if( end == null ) end = Archillect.resolveCurrentIndex();
+		if( end == null ) end = Website.resolveCurrentIndex();
 		if( start <= 0 || end <= 0 || start > end )
             error( 'Invalid index range' );
 		//if( imagePath == null )

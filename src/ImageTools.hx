@@ -1,4 +1,3 @@
-package archillect;
 
 import haxe.EnumTools.EnumValueTools;
 import om.color.ColorParser;
@@ -57,6 +56,7 @@ class ImageTools {
 			return { r : 0, g : 0, b : 0, a : 1.0 };
 		default:
 			var info = ColorParser.parseColor( str );
+			//trace(str);
 			if( info == null ) {
 				println( 'WARNING: failed to parse color info [$str]' );
 				return null;
@@ -81,8 +81,16 @@ class ImageTools {
 					a : EnumValueTools.getParameters( info.channels[3] )[0]
 				};
 			case 'gray','graya':
-				var v = ColorParser.getInt8Channel( info.channels[0] );
-				return { r : v, g : v, b : v, a : 1.0 };
+				switch info.channels[0] {
+					case CIFloat(v):
+					//TODO
+					var f = ColorParser.getFloatChannel( info.channels[0], HexMode );
+					var v = Math.round( 255 * f / 100 );
+					return { r : v, g : v, b : v, a : 1.0 };
+				default:
+					var v = ColorParser.getInt8Channel( info.channels[0] );
+					return { r : v, g : v, b : v, a : 1.0 };
+				}
 			default:
 				return throw 'unknown color space [$str]';
 			}

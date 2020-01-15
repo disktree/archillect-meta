@@ -1,11 +1,17 @@
 #-cpp bin/cpp
--neko bin/archillect-meta.n
--main archillect.Main
+#-neko bin/archillect-meta.n
+-hl bin/archillect-meta.hl
+#-js bin/archillect-meta.js
+#-lib hxnodejs
+#-D hl_ver=1.10.0
+-main Main
 -cp src
 -lib archillect
 -lib hxargs
 -lib om.core
 -lib om.color
+-lib om.fs
+#-lib hxssl
 -dce full
 -debug
 #-cmd cp bin/cpp/Main-debug bin/archillect-meta

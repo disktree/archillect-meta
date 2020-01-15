@@ -4,9 +4,9 @@ import haxe.Http;
 /**
 	Hacks for gathering data.
 **/
-class Archillect {
+class Website {
 
-	public static inline var URI = "http://archillect.com";
+	public static inline var URI = "https://archillect.com";
 
 	/**
 		HACK: Resolve the current index.
@@ -28,6 +28,19 @@ class Archillect {
 	**/
 	public static function resolveImageUrl( index : Int ) : String {
 		var url = URI +'/'+ index;
+		var curl = new Process( 'curl', [url] );
+		var html = curl.stdout.readAll().toString();
+		curl.close();
+		for( line in  html.split( '\n' ) ) {
+			if( line.indexOf('name="twitter:image"') != -1 ) {
+				line = line.substr( 0, line.length-1 )+'/>';
+				return Xml.parse( line ).firstElement().get( 'content' );
+			}
+
+		}
+		return null;
+		/*
+		var url = URI +'/'+ index;
 		var html = Http.requestUrl( url );
 		for( line in  html.split( '\n' ) ) {
 			if( line.indexOf('name="twitter:image"') != -1 ) {
@@ -38,6 +51,7 @@ class Archillect {
 
 		}
 		return null;
+		*/
 		/*
 		var line = StringTools.trim( html.split( '\n' )[19] );
 		line = line.substr( 0, line.length-1 )+'/>';
@@ -50,6 +64,24 @@ class Archillect {
 		Download image and save it to given path.
 	**/
 	public static function downloadImage( url : String, dst : String ) : String {
+	//	var curl = new Process( 'curl', ['-o',dst,'-s','-w',"%{http_code}\n",url] );
+		var curl = new Process( 'curl', ['-o',dst,url] );
+		var code = curl.exitCode();
+		//trace(code);
+		switch code {
+		case 0:
+			//var data = curl.stdout.readAll();
+			//curl.close();
+			//File.saveBytes( dst, data );
+			curl.close();
+			return url;
+		default:
+			curl.close();
+			return null;
+		}
+		
+		return url;
+		/*
 		var status : Int;
 		var req = new Http( url );
         var status : Int;
@@ -70,6 +102,15 @@ class Archillect {
         }
         req.request();
 		return url;
+		*/
 	}
+
+	/*
+	function request( url : String ) {
+		var curl = new Process( 'curl', [url] );
+		var html = curl.stdout.readAll().toString();
+		curl.close();
+	}
+	*/
 
 }
